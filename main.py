@@ -1,4 +1,5 @@
 import argparse
+import sys
 import os
 from dotenv import load_dotenv
 from google import genai
@@ -30,43 +31,54 @@ def main():
     
     client = genai.Client(api_key=api_key)
     
-    response = client.models.generate_content(model="gemini-2.5-flash",contents=messages,
-        config=types.GenerateContentConfig(tools=[available_functions], system_instruction=system_prompt)
+    for i in range(0,10):
+        
+        response = client.models.generate_content(model="gemini-2.5-flash",contents=messages,
+            config=types.GenerateContentConfig(tools=[available_functions], system_instruction=system_prompt)
             )
     
-    if not response.usage_metadata.candidates_token_count:
-        raise RuntimeError("Something went wrong when generating response")
+        if not response.usage_metadata.candidates_token_count:
+            raise RuntimeError("Something went wrong when generating response")
     
-    if args.verbose:
-        print(f"User prompt: {args.user_prompt}")
+        if args.verbose:
+            print(f"User prompt: {args.user_prompt}")
     
-        print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
+            print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
     
-        print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
+            print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
+        
+        if response.candidates:
+            for canditate in response.candidates:
+                messages.append(canditate.content)
+        
+        results = []
     
-    results = []
-    
-    if response.function_calls:
-        for call in response.function_calls:
+        if response.function_calls:
+            for call in response.function_calls:
             
-            result = call_function(call)
+                result = call_function(call)
             
-            if not result.parts:
-                raise Exception("No parts")
-            if not result.parts[0].function_response:
-                raise Exception("No function response")
-            if not result.parts[0].function_response.response:
-                raise Exception("No response")
+                if not result.parts:
+                    raise Exception("No parts")
+                if not result.parts[0].function_response:
+                    raise Exception("No function response")
+                if not result.parts[0].function_response.response:
+                    raise Exception("No response")
             
-            results.append(result.parts[0])
+                results.append(result.parts[0])
             
-            if args.verbose:
-                print(f"-> {result.parts[0].function_response.response}")
-            
-            return
+                if args.verbose:
+                    print(f"-> {result.parts[0].function_response.response}")
+
+                messages.append(types.Content(role="user", parts=results))
             
 
-    print(f"Response:\n{response.text}")
+        else:
+            print(f"Response:\n{response.text}")
+            return
+
+    print("Max iterations reached")
+    sys.exit(1)
 
 if __name__ == "__main__":
     main()
