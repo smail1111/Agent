@@ -17,18 +17,18 @@ I will be building an AI coding agent using Gemini-2.5-Flash that can
 
 2. Use your own API key
 
-Create api_key.env and set GEMINI_API_KEY to your own API key.
+Create `api_key.env` and set `GEMINI_API_KEY` to your own API key.
 
-3. Run main.py 
+3. Run `main.py` 
 
 `python3 main.py "Your request"`
 
-- Add `--verbose` toggle to recieve more information about token usage.
+- Add `--verbose` toggle to receive more information about token usage.
 
 ## Notes
 
 * Your own API key is required for the agent to work.
 
-* For safety precautions, the agent can only access files within the calculator directory.
+* For safety precautions, the agent can only access files within the `calculator` directory.
 
 * This should not be used as an actual AI coding agent for serious projects, as it does not have any safety guards that actual coding agents have.
